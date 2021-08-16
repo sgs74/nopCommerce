@@ -9,10 +9,9 @@ using Nop.Services.Configuration;
 using Nop.Services.Localization;
 using Nop.Services.Messages;
 using Nop.Services.Plugins;
+using Nop.Services.ScheduleTasks;
 using Nop.Services.Stores;
-using Nop.Services.Tasks;
 using Nop.Web.Framework.Infrastructure;
-using Task = System.Threading.Tasks.Task;
 
 namespace Nop.Plugin.Misc.Sendinblue
 {

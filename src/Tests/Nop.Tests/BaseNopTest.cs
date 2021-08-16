@@ -62,13 +62,13 @@ using Nop.Services.Orders;
 using Nop.Services.Payments;
 using Nop.Services.Plugins;
 using Nop.Services.Polls;
+using Nop.Services.ScheduleTasks;
 using Nop.Services.Security;
 using Nop.Services.Seo;
 using Nop.Services.Shipping;
 using Nop.Services.Shipping.Date;
 using Nop.Services.Shipping.Pickup;
 using Nop.Services.Stores;
-using Nop.Services.Tasks;
 using Nop.Services.Tax;
 using Nop.Services.Themes;
 using Nop.Services.Topics;
@@ -130,6 +130,7 @@ namespace Nop.Tests
 
             var memoryCache = new MemoryCache(new MemoryCacheOptions());
             var typeFinder = new AppDomainTypeFinder();
+            Singleton<ITypeFinder>.Instance = typeFinder;
 
             Singleton<DataSettings>.Instance = new DataSettings
             {
