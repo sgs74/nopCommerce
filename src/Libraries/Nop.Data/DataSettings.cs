@@ -2,6 +2,7 @@
 using FluentMigrator.Runner.Initialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Nop.Core.Configuration;
 
 namespace Nop.Data
 {

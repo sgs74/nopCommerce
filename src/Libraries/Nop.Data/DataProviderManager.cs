@@ -1,4 +1,5 @@
 ﻿using Nop.Core;
+using Nop.Core.Configuration;
 using Nop.Core.Infrastructure;
 using Nop.Data.DataProviders;
 

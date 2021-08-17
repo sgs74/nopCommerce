@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Nop.Core;
+using Nop.Core.Configuration;
 using Nop.Core.Infrastructure;
 
 namespace Nop.Data
@@ -84,18 +85,16 @@ namespace Nop.Data
             filePath ??= fileProvider.MapPath(NopDataSettingsDefaults.FilePath);
 
             //check whether file exists
-            if (!fileProvider.FileExists(filePath))
+            if (fileProvider.FileExists(filePath))
             {
-                //if not, try to parse the file that was used in previous nopCommerce versions
-                filePath = fileProvider.MapPath(NopDataSettingsDefaults.ObsoleteFilePath);
-                if (!fileProvider.FileExists(filePath))
+                var text = await fileProvider.ReadAllTextAsync(filePath, Encoding.UTF8);
+                if (string.IsNullOrEmpty(text))
                     return new DataSettings();
 
-                //get data settings from the old txt file
-                var dataSettings_old =
-                    LoadDataSettingsFromOldFile(await fileProvider.ReadAllTextAsync(filePath, Encoding.UTF8));
+                //get data settings from the JSON file
+                var dataSettings_old = JsonConvert.DeserializeObject<DataSettings>(text);
 
-                //save data settings to the new file
+                //save data settings to the new file - appsettings.json
                 await SaveSettingsAsync(dataSettings_old, fileProvider);
 
                 //and delete the old one
@@ -105,26 +104,15 @@ namespace Nop.Data
                 return Singleton<DataSettings>.Instance;
             }
 
-            var text = await fileProvider.ReadAllTextAsync(filePath, Encoding.UTF8);
-            if (string.IsNullOrEmpty(text))
-                return new DataSettings();
+            var appSettings = Singleton<AppSettings>.Instance.DataConfig;
 
             //get data settings from the JSON file
-            var dataSettings = JsonConvert.DeserializeObject<DataSettings>(text);
-
-            var dataConnectionString = Environment.GetEnvironmentVariable(NopDataSettingsDefaults.EnvironmentVariableDataConnectionString);
-            var dataProvider = Environment.GetEnvironmentVariable(NopDataSettingsDefaults.EnvironmentVariableDataProvider);
-            var sqlCommandTimeout = Environment.GetEnvironmentVariable(NopDataSettingsDefaults.EnvironmentVariableSQLCommandTimeout);
-
-            if (!string.IsNullOrEmpty(dataConnectionString))
-                dataSettings.ConnectionString = dataConnectionString;
-
-            if (!string.IsNullOrEmpty(dataProvider))
-                dataSettings.DataProvider = JsonConvert.DeserializeObject<DataProviderType>(dataProvider);
-
-            if (!string.IsNullOrEmpty(sqlCommandTimeout) && int.TryParse(sqlCommandTimeout, out var sqlTimeOut))
-                dataSettings.SQLCommandTimeout = sqlTimeOut;
-
+            var dataSettings = new DataSettings
+            {
+                ConnectionString = appSettings.ConnectionString,
+                DataProvider = appSettings.DataProvider,
+                SQLCommandTimeout = appSettings.SQLCommandTimeout
+            };
             Singleton<DataSettings>.Instance = dataSettings;
 
             return Singleton<DataSettings>.Instance;
@@ -146,15 +134,14 @@ namespace Nop.Data
             filePath ??= fileProvider.MapPath(NopDataSettingsDefaults.FilePath);
 
             //check whether file exists
-            if (!fileProvider.FileExists(filePath))
+            if (fileProvider.FileExists(filePath))
             {
-                //if not, try to parse the file that was used in previous nopCommerce versions
-                filePath = fileProvider.MapPath(NopDataSettingsDefaults.ObsoleteFilePath);
-                if (!fileProvider.FileExists(filePath))
+                var text = fileProvider.ReadAllText(filePath, Encoding.UTF8);
+                if (string.IsNullOrEmpty(text))
                     return new DataSettings();
 
-                //get data settings from the old txt file
-                var dataSettings_old = LoadDataSettingsFromOldFile(fileProvider.ReadAllText(filePath, Encoding.UTF8));
+                //get data settings from the JSON file
+                var dataSettings_old = JsonConvert.DeserializeObject<DataSettings>(text);
 
                 //save data settings to the new file
                 SaveSettings(dataSettings_old, fileProvider);
@@ -166,25 +153,15 @@ namespace Nop.Data
                 return Singleton<DataSettings>.Instance;
             }
 
-            var text = fileProvider.ReadAllText(filePath, Encoding.UTF8);
-            if (string.IsNullOrEmpty(text))
-                return new DataSettings();
+            var appSettings = Singleton<AppSettings>.Instance.DataConfig;
 
             //get data settings from the JSON file
-            var dataSettings = JsonConvert.DeserializeObject<DataSettings>(text);
-
-            var dataConnectionString = Environment.GetEnvironmentVariable(NopDataSettingsDefaults.EnvironmentVariableDataConnectionString);
-            var dataProvider = Environment.GetEnvironmentVariable(NopDataSettingsDefaults.EnvironmentVariableDataProvider);
-            var sqlCommandTimeout = Environment.GetEnvironmentVariable(NopDataSettingsDefaults.EnvironmentVariableSQLCommandTimeout);
-
-            if (!string.IsNullOrEmpty(dataConnectionString))
-                dataSettings.ConnectionString = dataConnectionString;
-
-            if (!string.IsNullOrEmpty(dataProvider))
-                dataSettings.DataProvider = JsonConvert.DeserializeObject<DataProviderType>(dataProvider);
-
-            if (!string.IsNullOrEmpty(sqlCommandTimeout) && int.TryParse(sqlCommandTimeout, out var sqlTimeOut))
-                dataSettings.SQLCommandTimeout = sqlTimeOut;
+            var dataSettings = new DataSettings
+            {
+                ConnectionString = appSettings.ConnectionString,
+                DataProvider = appSettings.DataProvider,
+                SQLCommandTimeout = appSettings.SQLCommandTimeout
+            };
 
             Singleton<DataSettings>.Instance = dataSettings;
 
@@ -202,14 +179,28 @@ namespace Nop.Data
             Singleton<DataSettings>.Instance = settings ?? throw new ArgumentNullException(nameof(settings));
 
             fileProvider ??= CommonHelper.DefaultFileProvider;
-            var filePath = fileProvider.MapPath(NopDataSettingsDefaults.FilePath);
+            var filePath = fileProvider.MapPath(NopDataSettingsDefaults.AppSettingsFilePath);
+
+            var appSettings = Singleton<AppSettings>.Instance;
+            appSettings.DataConfig = new DataConfig
+            {
+                ConnectionString = settings.ConnectionString,
+                DataProvider = settings.DataProvider,
+                SQLCommandTimeout = settings.SQLCommandTimeout,
+                RawDataSettings = settings.RawDataSettings
+            };
 
             //create file if not exists
-            fileProvider.CreateFile(filePath);
+            if (!fileProvider.FileExists(filePath))
+                fileProvider.CreateFile(filePath);
 
-            //save data settings to the file
-            var text = JsonConvert.SerializeObject(Singleton<DataSettings>.Instance, Formatting.Indented);
-            await fileProvider.WriteAllTextAsync(filePath, text, Encoding.UTF8);
+            //check additional configuration parameters
+            var additionalData = JsonConvert.DeserializeObject<AppSettings>(await fileProvider.ReadAllTextAsync(filePath, Encoding.UTF8))?.AdditionalData;
+            appSettings.AdditionalData = additionalData;
+
+            //save data app settings to the file
+            var text = JsonConvert.SerializeObject(appSettings, Formatting.Indented);
+            fileProvider.WriteAllText(filePath, text, Encoding.UTF8);
         }
 
         /// <summary>
@@ -222,13 +213,27 @@ namespace Nop.Data
             Singleton<DataSettings>.Instance = settings ?? throw new ArgumentNullException(nameof(settings));
 
             fileProvider ??= CommonHelper.DefaultFileProvider;
-            var filePath = fileProvider.MapPath(NopDataSettingsDefaults.FilePath);
+            var filePath = fileProvider.MapPath(NopDataSettingsDefaults.AppSettingsFilePath);
+
+            var appSettings = Singleton<AppSettings>.Instance;
+            appSettings.DataConfig = new DataConfig
+            {
+                ConnectionString = settings.ConnectionString,
+                DataProvider = settings.DataProvider,
+                SQLCommandTimeout = settings.SQLCommandTimeout,
+                RawDataSettings = settings.RawDataSettings
+            };
 
             //create file if not exists
-            fileProvider.CreateFile(filePath);
+            if (!fileProvider.FileExists(filePath))
+                fileProvider.CreateFile(filePath);
 
-            //save data settings to the file
-            var text = JsonConvert.SerializeObject(Singleton<DataSettings>.Instance, Formatting.Indented);
+            //check additional configuration parameters
+            var additionalData = JsonConvert.DeserializeObject<AppSettings>(fileProvider.ReadAllText(filePath, Encoding.UTF8))?.AdditionalData;
+            appSettings.AdditionalData = additionalData;
+
+            //save data app settings to the file
+            var text = JsonConvert.SerializeObject(appSettings, Formatting.Indented);
             fileProvider.WriteAllText(filePath, text, Encoding.UTF8);
         }
 
@@ -281,7 +286,7 @@ namespace Nop.Data
         /// </value>
         public static int GetSqlCommandTimeout()
         {
-            return (LoadSettings())?.SQLCommandTimeout ?? -1;
+            return LoadSettings()?.SQLCommandTimeout ?? -1;
         }
 
         #endregion

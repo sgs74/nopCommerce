@@ -47,6 +47,11 @@ namespace Nop.Core.Configuration
         public CommonConfig CommonConfig { get; set; } = new CommonConfig();
 
         /// <summary>
+        /// Gets or sets data configuration parameters
+        /// </summary>
+        public DataConfig DataConfig { get; set; } = new DataConfig();
+
+        /// <summary>
         /// Gets or sets additional configuration parameters
         /// </summary>
         [JsonExtensionData]
