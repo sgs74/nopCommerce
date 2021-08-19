@@ -5,6 +5,12 @@
     ViewBag.PageTitle = T("Admin.Customers.ActivityLog").Text;
     //active menu item (system name)
     Html.SetActiveMenuItemSystemName("Activity logs");
+
+    var customData = new Dictionary<string, object>
+    {
+        {"type", "tel"},
+        {"pattern", "2-[0-9]{3}-[0-9]{3}"}
+    };
 }
 
 @{
@@ -76,7 +82,7 @@
                                         <nop-label asp-for="IpAddress" />
                                     </div>
                                     <div class="col-md-8">
-                                        <nop-editor asp-for="IpAddress" />
+                                        <nop-editor asp-for="IpAddress" html-attributes="@customData"/>
                                     </div>
                                 </div>
                             </div>

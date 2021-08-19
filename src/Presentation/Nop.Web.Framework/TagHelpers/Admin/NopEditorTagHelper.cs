@@ -19,6 +19,7 @@ namespace Nop.Web.Framework.TagHelpers.Admin
 
         private const string FOR_ATTRIBUTE_NAME = "asp-for";
         private const string DISABLED_ATTRIBUTE_NAME = "asp-disabled";
+        private const string CUSTOM_HTML_ATTRIBUTES = "html-attributes";
         private const string REQUIRED_ATTRIBUTE_NAME = "asp-required";
         private const string RENDER_FORM_CONTROL_CLASS_ATTRIBUTE_NAME = "asp-render-form-control-class";
         private const string TEMPLATE_ATTRIBUTE_NAME = "asp-template";
@@ -37,6 +38,12 @@ namespace Nop.Web.Framework.TagHelpers.Admin
         /// </summary>
         [HtmlAttributeName(FOR_ATTRIBUTE_NAME)]
         public ModelExpression For { get; set; }
+
+        /// <summary>
+        /// Custom html attributes
+        /// </summary>
+        [HtmlAttributeName(CUSTOM_HTML_ATTRIBUTES)]
+        public Dictionary<string, object> CustomHtmlAttributes { set; get; }
 
         /// <summary>
         /// Indicates whether the field is disabled
@@ -131,6 +138,15 @@ namespace Nop.Web.Framework.TagHelpers.Admin
 
             //container for additional attributes
             var htmlAttributes = new Dictionary<string, object>();
+
+            //set custom html attributes
+            if(CustomHtmlAttributes?.Count > 0)
+            {
+                foreach (var (key, value) in CustomHtmlAttributes)
+                {
+                    htmlAttributes.Add(key, value);
+                }
+            }
 
             //set placeholder if exists
             if (!string.IsNullOrEmpty(Placeholder))
