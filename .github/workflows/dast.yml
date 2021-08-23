@@ -1,0 +1,14 @@
+  DAST_Zap:
+   name: DAST Zap
+   runs-on: ubuntu-latest 
+   steps:
+     - name: zap-Scan
+       uses: zaproxy/action-full-scan@v0.2.0
+       with:
+        target: http://a08110b0edf52470ba8485f499a97f77-1059316459.ap-southeast-2.elb.amazonaws.com/install
+     - name: artifacts
+       uses: actions/upload-artifact@v2
+       with:
+          name: DAST-artifact
+          path: ${{ github.workspace }}
+          
