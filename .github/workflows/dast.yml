@@ -1,3 +1,10 @@
+ name: DAST Scan
+ on:
+  schedule:
+    - cron:  '0 0 0 * *'
+  # Trigger once a mont manually
+  # workflow_dispatch:
+  
   DAST_Zap:
    name: DAST Zap
    runs-on: ubuntu-latest 
