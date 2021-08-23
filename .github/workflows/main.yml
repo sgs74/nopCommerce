@@ -1,4 +1,4 @@
-name: DevSecOps Project
+name: DevSecOps
 'on':
   push:
     branches:

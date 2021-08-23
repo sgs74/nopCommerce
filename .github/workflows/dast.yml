@@ -1,4 +1,4 @@
- name: DAST Scan
+ name: DAST-Scan
  on:
   schedule:
     - cron:  '0 0 0 * *'
