@@ -8,10 +8,11 @@ name: DAST Scan
       - develop
   workflow_dispatch: null
   
-  DAST_Zap:
-   name: DAST Zap
-   runs-on: ubuntu-latest 
-   steps:
+  jobs:
+   DAST_Zap:
+    name: DAST Zap
+    runs-on: ubuntu-latest 
+    steps:
      - name: zap-Scan
        uses: zaproxy/action-full-scan@v0.2.0
        with:
