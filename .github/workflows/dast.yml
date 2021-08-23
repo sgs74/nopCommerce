@@ -1,9 +1,12 @@
- name: DAST-Scan
- on:
-  schedule:
-    - cron:  '0 0 0 * *'
-  # Trigger once a mont manually
-  # workflow_dispatch:
+name: DAST Scan
+'on':
+  push:
+    branches:
+      - develop
+  pull_request:
+    branches:
+      - develop
+  workflow_dispatch: null
   
   DAST_Zap:
    name: DAST Zap
@@ -12,7 +15,7 @@
      - name: zap-Scan
        uses: zaproxy/action-full-scan@v0.2.0
        with:
-        target: http://a08110b0edf52470ba8485f499a97f77-1059316459.ap-southeast-2.elb.amazonaws.com/install
+        target: http://a3f8efd59f337478381772b2084a881f-969196202.ap-southeast-2.elb.amazonaws.com/install
      - name: artifacts
        uses: actions/upload-artifact@v2
        with:
