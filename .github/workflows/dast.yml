@@ -1,5 +1,5 @@
   DAST_Zap:
-   name: DAST Zap Scan
+   name: DAST Zap
    runs-on: ubuntu-latest 
    steps:
      - name: zap-Scan
