@@ -1,5 +1,5 @@
   DAST_Zap:
-   name: DAST Zap
+   name: DAST Zap Scan
    runs-on: ubuntu-latest 
    steps:
      - name: zap-Scan
@@ -11,4 +11,3 @@
        with:
           name: DAST-artifact
           path: ${{ github.workspace }}
-          
