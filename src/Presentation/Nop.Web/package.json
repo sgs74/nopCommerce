@@ -14,7 +14,7 @@
     "@fortawesome/fontawesome-free": "^5.15.2",
     "@laylazi/bootstrap-rtl": "^4.6.0-1",
     "admin-lte": "^3.0.5",
-    "bootstrap": "^4.6.0",
+    "bootstrap": "^5.0.0",
     "bootstrap-touchspin": "4.3.0",
     "chart.js": "^2.9.4",
     "cldr-data": ">=36.0.0",
